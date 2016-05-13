@@ -3,10 +3,6 @@ CHANGELOG for ACL for Drupal 8
 
 
 acl 8.x-1.x-dev:
-  Fixes:
-    - #2580207 by mccrodp: Add missing acl_remove_all_users() function.
-  Tasks:
-    - #2610538 by id.tarzanych: Replace Database::getConnection() with \Drupal::database().
 
 
 acl 8.x-1.0-alpha1 (2015-10-19):

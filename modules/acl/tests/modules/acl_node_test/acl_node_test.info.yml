@@ -5,8 +5,8 @@ description: 'Support module for ACL node related testing.'
 package: Testing
 
 
-# Information added by Drupal.org packaging script on 2015-11-10
-version: '8.x-1.0-alpha1+2-dev'
+# Information added by Drupal.org packaging script on 2015-10-19
+version: '8.x-1.0-alpha1'
 core: '8.x'
 project: 'acl'
-datestamp: 1447155830
+datestamp: 1445215140

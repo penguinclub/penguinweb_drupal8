@@ -7,23 +7,24 @@
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Database\Database;
 
 /**
  * Implementation of acl_edit_form().
  */
 function _acl_edit_form($acl_id, $label = NULL, $new_acl = FALSE) {
-  $database = \Drupal::database();
+  $connection = Database::getConnection();
 
   $accounts = array();
   if (!$new_acl) {
     // Ensure the ACL in question even exists.
-    if (!($record = $database->query("SELECT name, figure FROM {acl} WHERE acl_id = :acl_id", [
+    if (!($record = $connection->query("SELECT name, figure FROM {acl} WHERE acl_id = :acl_id", [
       'acl_id' => $acl_id,
     ])->fetchAssoc())) {
       return array();
     }
 
-    $result = $database->query("SELECT u.uid, ud.name FROM {users} u INNER JOIN {users_field_data} ud ON u.uid = ud.uid LEFT JOIN {acl_user} aclu ON aclu.uid = u.uid WHERE acl_id = :acl_id", [
+    $result = $connection->query("SELECT u.uid, ud.name FROM {users} u INNER JOIN {users_field_data} ud ON u.uid = ud.uid LEFT JOIN {acl_user} aclu ON aclu.uid = u.uid WHERE acl_id = :acl_id", [
       'acl_id' => $acl_id,
     ]);
 
@@ -111,7 +112,7 @@ function _acl_edit_form_after_build($form, FormStateInterface $form_state) {
     }
   }
   elseif (!empty($triggering_element['#value']) && $triggering_element['#value'] == $form['add_button']['#value'] && !empty($form['add']['#value'])) {
-    $user = \Drupal::database()->query("SELECT u.uid, ud.name FROM {users} u INNER JOIN {users_field_data} ud ON u.uid = ud.uid WHERE ud.name = :name", [
+    $user = Database::getConnection()->query("SELECT u.uid, ud.name FROM {users} u INNER JOIN {users_field_data} ud ON u.uid = ud.uid WHERE ud.name = :name", [
       'name' => $form['add']['#value'],
     ])->fetchObject();
     if (!$user) {
@@ -144,14 +145,14 @@ function _acl_edit_form_after_build($form, FormStateInterface $form_state) {
  * The module that embedded our form must call this function!
  */
 function acl_save_form($form, $priority = NULL) {
-  $database = \Drupal::database();
+  $connection = Database::getConnection();
 
   $users = unserialize($form['user_list']);
-  $database->delete('acl_user')
+  $connection->delete('acl_user')
     ->condition('acl_id', $form['acl_id'])
     ->execute();
   foreach ($users as $uid => $name) {
-    $database->insert('acl_user')
+    $connection->insert('acl_user')
     ->fields([
       'acl_id' => $form['acl_id'],
       'uid' => $uid,
@@ -159,7 +160,7 @@ function acl_save_form($form, $priority = NULL) {
     ->execute();
   }
   if (isset($priority)) {
-    $database->update('acl_node')
+    $connection->update('acl_node')
       ->fields([
         'priority' => $priority,
       ])
